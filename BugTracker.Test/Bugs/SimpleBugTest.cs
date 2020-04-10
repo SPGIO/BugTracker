@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace BugTracker.Test
 {
     [TestClass]
-    public class UnitTest1
+    public class SimpleBugTest
     {
         [TestMethod]
         public void TestMethod1()
