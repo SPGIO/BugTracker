@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BugTracker.Services.Bugs
+namespace BugTracker.Models.Services.Bugs
 {
     public class BugNotFoundException : Exception
     {

@@ -3,6 +3,7 @@ using BugTracker.Models.Bugs;
 using BugTracker.Models.Bugs.Priority;
 using BugTracker.Models.Bugs.Status;
 using BugTracker.Services;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -18,31 +19,13 @@ namespace BugTracker.Test.Services
     public class BugServiceTest
     {
 
-        private Mock<ApplicationDbContext> _mockBugContext;
-        private Mock<DbSet<Bug>> _mockBugs;
-        private BugService _bugService;
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            _mockBugContext = new Mock<ApplicationDbContext>();
-            _mockBugs = new Mock<DbSet<Bug>>();
-            _mockBugContext.Setup(x => x.Bugs).Returns(_mockBugs.Object);
-            _bugService = new BugService(_mockBugContext.Object);
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            _mockBugContext.VerifyAll();
-        }
+        
 
         [TestMethod]
         public async Task GetAll_DatabaseHasItems_ReturnsItems()
         {
-            BugPriority criticalBugPriority = BugPriorityFactory.GetBugPriority(
+            var criticalBugPriority = BugPriorityFactory.GetBugPriority(
                 BugPriorityFactory.PriorityType.Critical);
-
 
             BugStatus fixedStatus = new FixedStatus() 
             { 
@@ -50,9 +33,9 @@ namespace BugTracker.Test.Services
                 Name = "Fixed"
             };
 
-            var stubData = (new List<SimpleBug>
+            var stubData = (new List<Bug>
             {
-                new SimpleBug()
+                new Bug()
                 {
                     Id = 1,
                     DateReported = new DateTime(2020,04,09),
@@ -61,7 +44,7 @@ namespace BugTracker.Test.Services
                     Priorty = criticalBugPriority,
                     Status = fixedStatus
             },
-                new SimpleBug()
+                new Bug()
                 {
                     Id = 2,
                     DateReported = new DateTime(2020,04,09),
@@ -72,21 +55,55 @@ namespace BugTracker.Test.Services
                 }
             }).AsQueryable();
 
-            SetupTestData(stubData, _mockBugs);
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(databaseName: "")
+                .Options;
 
-            var actual = await _bugService.GetAll();
+            using(var context = new ApplicationDbContext(options))
+            {
+                context.AddRange(stubData);
+            }
 
+            using (var context = new ApplicationDbContext(options))
+            {
+                var actual = await _bugService.GetAll();
             CollectionAssert.AreEqual(stubData.ToList(), actual.ToList());
+            }
+
         }
 
-        private void SetupTestData<T>(IQueryable<T> testData, Mock<DbSet<T>> mockDbSet) where T : class
+        
+
+
+        [TestMethod]
+        public async Task AddContact_Given_contact_ExpectContactAdded()
         {
-            mockDbSet.As<IQueryable<IBug>>().Setup(m => m.Provider).Returns(testData.Provider);
-            mockDbSet.As<IQueryable<IBug>>().Setup(m => m.Expression).Returns(testData.Expression);
-            mockDbSet.As<IQueryable<IBug>>().Setup(m => m.ElementType).Returns(testData.ElementType);
-            mockDbSet.As<IQueryable<IBug>>().Setup(m => m.GetEnumerator())
-                .Returns((IEnumerator<IBug>) testData.GetEnumerator());
-        }
+            BugPriority criticalBugPriority = BugPriorityFactory.GetBugPriority(
+                BugPriorityFactory.PriorityType.Critical);
 
+
+            BugStatus fixedStatus = new FixedStatus()
+            {
+                Id = 1,
+                Name = "Fixed"
+            };
+
+            var bug = new Bug()
+            {
+                DateReported = new DateTime(2020, 04, 09),
+                DateFixed = new DateTime(2020, 04, 10),
+                HowToReproduceBug = "bug 2",
+                Priorty = criticalBugPriority,
+                Status = fixedStatus
+            };
+            const int expectedId = 1;
+            _mockContext.Setup(x => x.SaveChanges()).Callback(() => bug.Id = expectedId);
+
+            int id = await _bugService.Add(bug);
+
+            _mockBugs.Verify(x => x.Add(bug), Times.Once);
+            _mockContext.Verify(x => x.SaveChanges(), Times.Once);
+            Assert.AreEqual(expectedId, id);
+        }
     }
 }
