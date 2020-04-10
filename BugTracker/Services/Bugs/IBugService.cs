@@ -1,9 +1,9 @@
 ﻿using BugTracker.Data;
-using BugTracker.Models;
+using BugTracker.Models.Bugs;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BugTracker.Services
+namespace BugTracker.Services.Bugs
 {
     public interface IBugService
     {

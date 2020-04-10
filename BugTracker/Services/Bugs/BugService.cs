@@ -1,5 +1,6 @@
 ﻿using BugTracker.Data;
 using BugTracker.Models.Bugs;
+using BugTracker.Services.Bugs;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,20 +32,26 @@ namespace BugTracker.Services
         }
 
         public async Task<IEnumerable<IBug>> GetAll()
-            => await Context.Bugs.ToListAsync();
+            => await Context.Bugs
+                    .Include(bug => bug.Status)
+                    .Include(bug => bug.Priorty)
+                    .ToListAsync();
+
 
         public Task<IBug> GetById(int id)
             => Context.Bugs.FirstOrDefaultAsync(bug => bug.Id == id);
 
         public async Task<IEnumerable<IBug>> GetByPriority(IBugPriorty priorty)
-            => await Context.Bugs
-                    .Where(bug => bug.Priorty == priorty)
-                    .ToListAsync();
+        {
+            var allBugs = await GetAll();
+            return allBugs.Where(bug => bug.Priorty == priorty);
+        }
 
         public async Task<IEnumerable<IBug>> GetByStatus(IBugPriorty priorty)
-            => await Context.Bugs
-                    .Where(bug => bug.Priorty == priorty)
-                    .ToListAsync();
+        {
+            var allBugs = await GetAll();
+            return allBugs.Where(bug => bug.Priorty == priorty);
+        }
 
         public async Task Update(IBug item)
         {
