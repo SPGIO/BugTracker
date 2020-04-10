@@ -1,7 +1,6 @@
 ﻿using BugTracker.Data;
-using BugTracker.Models;
+using BugTracker.Models.Bugs;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
