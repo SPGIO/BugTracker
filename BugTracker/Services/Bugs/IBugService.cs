@@ -10,12 +10,12 @@ namespace BugTracker.Services.Bugs
     {
         ApplicationDbContext Context { get; set; }
 
-        Task<int> Add(IBug item);
-        Task Delete(IBug item);
-        Task<IEnumerable<IBug>> GetAll();
-        Task<IBug> GetById(int id);
-        Task<IEnumerable<IBug>> GetByPriority(IBugPriority priorty);
-        Task<IEnumerable<IBug>> GetByStatus(IBugStatus status);
-        Task Update(IBug item);
+        Task<int> Add(Bug item);
+        Task Delete(Bug item);
+        Task<IEnumerable<Bug>> GetAll();
+        Task<Bug> GetById(int id);
+        Task<IEnumerable<Bug>> GetByPriority(IBugPriority priorty);
+        Task<IEnumerable<Bug>> GetByStatus(IBugStatus status);
+        Task Update(Bug item);
     }
 }

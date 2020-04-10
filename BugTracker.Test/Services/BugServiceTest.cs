@@ -19,14 +19,14 @@ namespace BugTracker.Test.Services
     {
 
         private Mock<ApplicationDbContext> _mockBugContext;
-        private Mock<DbSet<IBug>> _mockBugs;
+        private Mock<DbSet<Bug>> _mockBugs;
         private BugService _bugService;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _mockBugContext = new Mock<ApplicationDbContext>();
-            _mockBugs = new Mock<DbSet<IBug>>();
+            _mockBugs = new Mock<DbSet<Bug>>();
             _mockBugContext.Setup(x => x.Bugs).Returns(_mockBugs.Object);
             _bugService = new BugService(_mockBugContext.Object);
         }

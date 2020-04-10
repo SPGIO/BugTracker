@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BugTracker.Services
 {
-    public class BugService : IService<IBug>, IBugService
+    public class BugService : IService<Bug>, IBugService
     {
         public ApplicationDbContext Context { get; set; }
         public BugService(ApplicationDbContext context)
@@ -17,42 +17,42 @@ namespace BugTracker.Services
             Context = context;
         }
 
-        public async Task<int> Add(IBug item)
+        public async Task<int> Add(Bug item)
         {
             Context.Add(item);
             await Context.SaveChangesAsync();
             return item.Id;
         }
 
-        public async Task Delete(IBug item)
+        public async Task Delete(Bug item)
         {
             Context.Remove(item);
             await Context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<IBug>> GetAll()
+        public async Task<IEnumerable<Bug>> GetAll()
             => await Context.Bugs
                     .Include(bug => bug.Status)
                     .Include(bug => bug.Priorty)
                     .ToListAsync();
 
 
-        public Task<IBug> GetById(int id)
+        public Task<Bug> GetById(int id)
             => Context.Bugs.FirstOrDefaultAsync(bug => bug.Id == id);
 
-        public async Task<IEnumerable<IBug>> GetByPriority(IBugPriority priorty)
+        public async Task<IEnumerable<Bug>> GetByPriority(IBugPriority priorty)
         {
             var allBugs = await GetAll();
             return allBugs.Where(bug => bug.Priorty == priorty);
         }
 
-        public async Task<IEnumerable<IBug>> GetByStatus(IBugStatus status)
+        public async Task<IEnumerable<Bug>> GetByStatus(IBugStatus status)
         {
             var allBugs = await GetAll();
             return allBugs.Where(bug => bug.Status == status);
         }
 
-        public async Task Update(IBug item)
+        public async Task Update(Bug item)
         {
             Context.Bugs.Update(item);
             await Context.SaveChangesAsync();

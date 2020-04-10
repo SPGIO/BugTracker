@@ -3,13 +3,7 @@ using System;
 
 namespace BugTracker.Models.Bugs
 {
-    public class SimpleBug : IBug
+    public class SimpleBug : Bug
     {
-        public int Id { get; set; }
-        public string HowToReproduceBug { get; set; }
-        public DateTime DateReported { get; set; }
-        public DateTime DateFixed { get; set; }
-        public IBugStatus Status { get; set; }
-        public IBugPriority Priorty { get; set; }
     }
 }
