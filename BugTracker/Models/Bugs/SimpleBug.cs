@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BugTracker.Models.Bugs.Priority;
+using System;
 
 namespace BugTracker.Models.Bugs
 {
@@ -9,6 +10,6 @@ namespace BugTracker.Models.Bugs
         public DateTime DateReported { get; set; }
         public DateTime DateFixed { get; set; }
         public IBugStatus Status { get; set; }
-        public IBugPriorty Priorty { get; set; }
+        public IBugPriority Priorty { get; set; }
     }
 }

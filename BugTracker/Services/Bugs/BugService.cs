@@ -1,5 +1,6 @@
 ﻿using BugTracker.Data;
 using BugTracker.Models.Bugs;
+using BugTracker.Models.Bugs.Priority;
 using BugTracker.Services.Bugs;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -10,19 +11,17 @@ namespace BugTracker.Services
 {
     public class BugService : IService<IBug>, IBugService
     {
+        public ApplicationDbContext Context { get; set; }
         public BugService(ApplicationDbContext context)
         {
             Context = context;
         }
 
-        public ApplicationDbContext Context { get; set; }
-
-
-
-        public async Task Add(IBug item)
+        public async Task<int> Add(IBug item)
         {
             Context.Add(item);
             await Context.SaveChangesAsync();
+            return item.Id;
         }
 
         public async Task Delete(IBug item)
@@ -41,16 +40,16 @@ namespace BugTracker.Services
         public Task<IBug> GetById(int id)
             => Context.Bugs.FirstOrDefaultAsync(bug => bug.Id == id);
 
-        public async Task<IEnumerable<IBug>> GetByPriority(IBugPriorty priorty)
+        public async Task<IEnumerable<IBug>> GetByPriority(IBugPriority priorty)
         {
             var allBugs = await GetAll();
             return allBugs.Where(bug => bug.Priorty == priorty);
         }
 
-        public async Task<IEnumerable<IBug>> GetByStatus(IBugPriorty priorty)
+        public async Task<IEnumerable<IBug>> GetByStatus(IBugStatus status)
         {
             var allBugs = await GetAll();
-            return allBugs.Where(bug => bug.Priorty == priorty);
+            return allBugs.Where(bug => bug.Status == status);
         }
 
         public async Task Update(IBug item)

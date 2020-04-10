@@ -12,7 +12,7 @@ namespace BugTracker.Services
         ApplicationDbContext Context { get; set; }
 
         Task<IEnumerable<T>> GetAll();
-        Task Add(T item);
+        Task<int> Add(T item);
         Task Update(T item);
         Task Delete(T item);
     }

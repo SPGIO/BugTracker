@@ -1,6 +1,6 @@
-﻿namespace BugTracker.Models.Bugs
+﻿namespace BugTracker.Models.Bugs.Priority
 {
-    public interface IBugPriorty
+    public interface IBugPriority
     {
         int Id { get; set; }
         int Priority { get; set; }
