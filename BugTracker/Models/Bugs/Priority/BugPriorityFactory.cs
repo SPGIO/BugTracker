@@ -7,7 +7,7 @@ namespace BugTracker.Models.Bugs.Priority
 {
     public static partial class BugPriorityFactory
     {
-        public static IBugPriority GetBugPriority(PriorityType priorityType)
+        public static BugPriority GetBugPriority(PriorityType priorityType)
         {
             return priorityType switch
             {

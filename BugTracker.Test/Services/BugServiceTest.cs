@@ -40,11 +40,11 @@ namespace BugTracker.Test.Services
         [TestMethod]
         public async Task GetAll_DatabaseHasItems_ReturnsItems()
         {
-            IBugPriority criticalBugPriority = BugPriorityFactory.GetBugPriority(
+            BugPriority criticalBugPriority = BugPriorityFactory.GetBugPriority(
                 BugPriorityFactory.PriorityType.Critical);
 
 
-            IBugStatus fixedStatus = new FixedStatus() 
+            BugStatus fixedStatus = new FixedStatus() 
             { 
                 Id = 1, 
                 Name = "Fixed"

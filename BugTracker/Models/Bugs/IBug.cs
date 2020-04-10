@@ -1,4 +1,5 @@
 ﻿using BugTracker.Models.Bugs.Priority;
+using BugTracker.Models.Bugs.Status;
 using System;
 
 namespace BugTracker.Models.Bugs
@@ -9,7 +10,7 @@ namespace BugTracker.Models.Bugs
         string HowToReproduceBug { get; set; }
         DateTime DateReported { get; set; }
         DateTime DateFixed { get; set; }
-        IBugStatus Status { get; set; }
-        IBugPriority Priorty { get; set; }
+        BugStatus Status { get; set; }
+        BugPriority Priorty { get; set; }
     }
 }

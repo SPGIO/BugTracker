@@ -1,6 +1,7 @@
 ﻿using BugTracker.Data;
 using BugTracker.Models.Bugs;
 using BugTracker.Models.Bugs.Priority;
+using BugTracker.Models.Bugs.Status;
 using BugTracker.Services.Bugs;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;

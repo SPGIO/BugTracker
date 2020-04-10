@@ -1,4 +1,4 @@
-﻿namespace BugTracker.Models.Bugs
+﻿namespace BugTracker.Models.Bugs.Status
 {
     public interface IBugStatus
     {

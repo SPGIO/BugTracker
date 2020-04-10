@@ -1,8 +1,6 @@
 ﻿using BugTracker.Models.Bugs.Priority;
+using BugTracker.Models.Bugs.Status;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BugTracker.Models.Bugs
 {
@@ -12,7 +10,7 @@ namespace BugTracker.Models.Bugs
         public string HowToReproduceBug { get; set; }
         public DateTime DateReported { get; set; }
         public DateTime DateFixed { get; set; }
-        public IBugStatus Status { get; set; }
-        public IBugPriority Priorty { get; set; }
+        public BugStatus Status { get; set; }
+        public BugPriority Priorty { get; set; }
     }
 }
