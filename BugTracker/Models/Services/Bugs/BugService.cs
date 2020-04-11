@@ -1,5 +1,5 @@
 ﻿using BugTracker.Models.Bugs;
-using BugTracker.Models.Bugs.Priority;
+using BugTracker.Models.Bugs.Severity;
 using BugTracker.Models.Bugs.Status;
 using BugTracker.Models.Repositories;
 using System.Collections.Generic;
@@ -17,10 +17,10 @@ namespace BugTracker.Models.Services.Bugs
         {
             Repository = repository;
         }
-        public async Task<IEnumerable<Bug>> GetBugsByPriority(IBugPriority priorty)
+        public async Task<IEnumerable<Bug>> GetBugsByPriority(IBugSeverity priorty)
         {
             var allBugs = await Repository.GetAll();
-            return allBugs.Where(bug => bug.Priorty == priorty);
+            return allBugs.Where(bug => bug.Severity == priorty);
         }
 
         public async Task<IEnumerable<Bug>> GetBugsByStatus(IBugStatus status)

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BugTracker.Models.Bugs.Priority
+namespace BugTracker.Models.Bugs.Severity
 {
-    public class BugPriority : IBugPriority
+    public class BugSeverity : IBugSeverity
     {
         public int Id { get; set; }
         public string Name { get; set; }

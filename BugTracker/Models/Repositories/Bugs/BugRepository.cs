@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BugTracker.Data;
 using BugTracker.Models.Bugs;
-using BugTracker.Models.Bugs.Priority;
+using BugTracker.Models.Bugs.Severity;
 using BugTracker.Models.Bugs.Status;
 using BugTracker.Models.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -37,7 +37,7 @@ namespace BugTracker.Models.Repositories.Bugs
         public async Task<IEnumerable<Bug>> GetAll()
             => await Context.Bugs
                     .Include(bug => bug.Status)
-                    .Include(bug => bug.Priorty)
+                    .Include(bug => bug.Severity)
                     .ToListAsync();
 
 

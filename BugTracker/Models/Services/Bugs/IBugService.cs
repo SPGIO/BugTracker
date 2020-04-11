@@ -1,5 +1,5 @@
 ﻿using BugTracker.Models.Bugs;
-using BugTracker.Models.Bugs.Priority;
+using BugTracker.Models.Bugs.Severity;
 using BugTracker.Models.Bugs.Status;
 using BugTracker.Models.Repositories;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ namespace BugTracker.Models.Services.Bugs
         Task<bool> DeleteBug(Bug bug);
         Task<IEnumerable<Bug>> GetAllBugs();
         Task<Bug> GetBugById(int id);
-        Task<IEnumerable<Bug>> GetBugsByPriority(IBugPriority priorty);
+        Task<IEnumerable<Bug>> GetBugsByPriority(IBugSeverity priorty);
         Task<IEnumerable<Bug>> GetBugsByStatus(IBugStatus status);
         Task<bool> UpdateBug(Bug bug);
     }

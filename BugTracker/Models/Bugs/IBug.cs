@@ -1,4 +1,4 @@
-﻿using BugTracker.Models.Bugs.Priority;
+﻿using BugTracker.Models.Bugs.Severity;
 using BugTracker.Models.Bugs.Status;
 using System;
 
@@ -8,9 +8,13 @@ namespace BugTracker.Models.Bugs
     {
         int Id { get; set; }
         string HowToReproduceBug { get; set; }
+        ApplicationUser ReportedBy { get; set; }
         DateTime DateReported { get; set; }
+        ApplicationUser FixedBy { get; set; }
         DateTime DateFixed { get; set; }
         BugStatus Status { get; set; }
-        BugPriority Priorty { get; set; }
+        BugSeverity Severity { get; set; }
+
+
     }
 }

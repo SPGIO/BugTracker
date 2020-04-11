@@ -1,15 +1,10 @@
 ﻿using BugTracker.Data;
 using BugTracker.Models.Bugs;
-using BugTracker.Models.Bugs.Priority;
-using BugTracker.Models.Bugs.Status;
 using BugTracker.Models.Repositories.Bugs;
-using BugTracker.Models.Services.Bugs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace BugTracker.Test.Repositories.Bugs
