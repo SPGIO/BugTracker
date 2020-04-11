@@ -1,4 +1,5 @@
-﻿using BugTracker.Models.Bugs;
+﻿using BugTracker.Models;
+using BugTracker.Models.Bugs;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,5 +13,6 @@ namespace BugTracker.Data
         }
 
         public DbSet<Bug> Bugs { get; set; }
+        public DbSet<Project> Projects { get; set; }
     }
 }

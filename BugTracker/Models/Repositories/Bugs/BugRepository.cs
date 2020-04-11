@@ -15,10 +15,7 @@ namespace BugTracker.Models.Repositories.Bugs
     public class BugRepository : IRepository<Bug>
     {
         public ApplicationDbContext Context { get; set; }
-        public BugRepository(ApplicationDbContext context)
-        {
-            Context = context;
-        }
+        public BugRepository(ApplicationDbContext context) => Context = context;
 
         public int Add(Bug item)
         {
