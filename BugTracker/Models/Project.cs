@@ -1,8 +1,8 @@
 ﻿using BugTracker.Models.Bugs;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BugTracker.Models
 {
@@ -10,9 +10,11 @@ namespace BugTracker.Models
     {
         [Key]
         public int Id { get; set; }
+        [Required]
         public string Name { get; set; }
-        public IEnumerable<Bug> Bugs { get; set; }
+        public virtual ICollection<Bug> Bugs { get; set; }
+        [Required]
         public DateTime DateCreated { get; set; }
-        public IEnumerable<ApplicationUser> Team { get; set; }
+        public virtual ICollection<IdentityUser> Team { get; set; }
     }
 }

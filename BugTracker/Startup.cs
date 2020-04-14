@@ -12,6 +12,11 @@ using BugTracker.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using BugTracker.Models.Repositories.Projects;
+using BugTracker.Models.Repositories.Bugs;
+using BugTracker.Models.Repositories.Status;
+using BugTracker.Models.Repositories.Severity;
+using BugTracker.Models.Repositories.Users;
 
 namespace BugTracker
 {
@@ -29,9 +34,15 @@ namespace BugTracker
         {
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+                    Configuration.GetConnectionString("DefaultConnection"))
+                    .EnableSensitiveDataLogging());
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddScoped<IProjectRepository, ProjectRepository>();
+            services.AddScoped<IBugRepository, BugRepository>();
+            services.AddScoped<IStatusRepository, StatusRepository>();
+            services.AddScoped<ISeverityRepository, SeverityRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
             services.AddControllersWithViews();
             services.AddRazorPages();
         }
@@ -60,6 +71,11 @@ namespace BugTracker
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllerRoute(
+                    name: "testing",
+                    pattern: "{ProjectName}/{controller}/{action}/{id?}",
+                    defaults: new { controller = "Bugs", action = "Index" });
+                
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");

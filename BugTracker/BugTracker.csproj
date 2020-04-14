@@ -8,6 +8,18 @@
   <ItemGroup>
     <Compile Remove="Data\Migrations\20200411085713_Projects have teams.cs" />
     <Compile Remove="Data\Migrations\20200411085713_Projects have teams.Designer.cs" />
+    <Compile Remove="Data\Migrations\20200412102204_adding dateCreated in Project to be timestamp.cs" />
+    <Compile Remove="Data\Migrations\20200412102204_adding dateCreated in Project to be timestamp.Designer.cs" />
+    <Compile Remove="Data\Migrations\20200412113228_Changing IndentityUser to ApplicationUser.cs" />
+    <Compile Remove="Data\Migrations\20200412113228_Changing IndentityUser to ApplicationUser.Designer.cs" />
+    <Compile Remove="Data\Migrations\20200412114902_new relation with Project and Bugs and Team.cs" />
+    <Compile Remove="Data\Migrations\20200412114902_new relation with Project and Bugs and Team.Designer.cs" />
+    <Compile Remove="Data\Migrations\20200412115305_new relation with Project and Bugs and Team.cs" />
+    <Compile Remove="Data\Migrations\20200412115305_new relation with Project and Bugs and Team.Designer.cs" />
+    <Compile Remove="Data\Migrations\20200412115541_new relation with Project and Bugs and Team.cs" />
+    <Compile Remove="Data\Migrations\20200412115541_new relation with Project and Bugs and Team.Designer.cs" />
+    <Compile Remove="Data\Migrations\20200412115645_new relation with Project and Bugs and Team.cs" />
+    <Compile Remove="Data\Migrations\20200412115645_new relation with Project and Bugs and Team.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,8 +33,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.3" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.1" />
   </ItemGroup>
 
 </Project>

@@ -6,14 +6,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
+using BugTracker.Models.Repositories.Bugs;
 
 namespace BugTracker.Models.Services.Bugs
 {
     public class BugService : IBugService
     {
-        public IRepository<Bug> Repository { get; }
+        public IBugRepository Repository { get; }
 
-        public BugService(IRepository<Bug> repository)
+        public BugService(IBugRepository repository)
         {
             Repository = repository;
         }
@@ -62,13 +63,15 @@ namespace BugTracker.Models.Services.Bugs
             }
         }
 
-        public async Task<Bug> GetBugById(int id)
+        public async Task<Bug> GetBugById(int? id)
         {
-            var allBugs = await GetAllBugs();
-            Bug bugFound = allBugs.FirstOrDefault(bug => bug.Id == id);
-            if (bugFound == null)
-                throw new BugNotFoundException();
+            if (id == null) throw new BugNotFoundException();
+            Bug bugFound = await Repository.GetById(id.Value);
+            if (bugFound == null) throw new BugNotFoundException();
             return bugFound;
         }
+
+        public async Task<bool> BugExists(int id) 
+            => await Repository.Exists(id);
     }
 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BugTracker.Models.Repositories.Projects
 {
-    public class ProjectRepository : IRepository<Project>
+    public class ProjectRepository : IRepository<Project>, IProjectRepository
     {
 
         public ApplicationDbContext Context { get; set; }
@@ -31,13 +31,10 @@ namespace BugTracker.Models.Repositories.Projects
 
         public async Task<IEnumerable<Project>> GetAll()
         {
-            var project = Context.Projects;
-            var bugsInProject = project.Include(project => project.Bugs);
-            bugsInProject.ThenInclude(bug => bug.FixedBy);
-            bugsInProject.ThenInclude(bug => bug.ReportedBy);
-            bugsInProject.ThenInclude(bug => bug.Status);
-            bugsInProject.ThenInclude(bug => bug.Severity);
-            project.Include(project => project.Team);
+            var project = Context.Projects
+                .Include(project => project.Bugs).ThenInclude(bug => bug.Severity)
+                .Include(project => project.Bugs).ThenInclude(bug => bug.Status)
+                .Include(project => project.Team);
             return await project.ToListAsync();
         }
 
@@ -55,9 +52,12 @@ namespace BugTracker.Models.Repositories.Projects
             return false;
         }
 
-        public async Task<Project> GetById(int id)
+        public async Task<Project> GetById(int? id)
         {
+            if (id == null) throw new ArgumentNullException();
             var projectFound =  await Context.Projects
+                .Include(project => project.Team)
+                .Include(project => project.Bugs)
                 .FirstOrDefaultAsync(project => project.Id == id);
             if (projectFound == null) throw new KeyNotFoundException();
             return projectFound;
@@ -72,5 +72,8 @@ namespace BugTracker.Models.Repositories.Projects
 
         public void LogError(Exception exception)
             => Debug.WriteLine($"Error!\n{exception.Message}");
+
+        public async Task<bool> Exists(int id)
+            => await Context.Projects.AnyAsync(project => project.Id == id);
     }
 }

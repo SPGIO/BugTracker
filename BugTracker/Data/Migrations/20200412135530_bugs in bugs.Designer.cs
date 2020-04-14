@@ -4,14 +4,16 @@ using BugTracker.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BugTracker.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200412135530_bugs in bugs")]
+    partial class bugsinbugs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,14 +28,11 @@ namespace BugTracker.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime?>("DateFixed")
+                    b.Property<DateTime>("DateFixed")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("DateReported")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FixedById")
                         .HasColumnType("nvarchar(450)");
@@ -52,10 +51,6 @@ namespace BugTracker.Data.Migrations
 
                     b.Property<int?>("StatusId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -102,7 +97,7 @@ namespace BugTracker.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BugStatuses");
+                    b.ToTable("BugStatus");
                 });
 
             modelBuilder.Entity("BugTracker.Models.Project", b =>
@@ -187,6 +182,10 @@ namespace BugTracker.Data.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
@@ -243,6 +242,8 @@ namespace BugTracker.Data.Migrations
                     b.HasIndex("ProjectId");
 
                     b.ToTable("AspNetUsers");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -329,9 +330,16 @@ namespace BugTracker.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("BugTracker.Models.ApplicationUser", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
+
+                    b.HasDiscriminator().HasValue("ApplicationUser");
+                });
+
             modelBuilder.Entity("BugTracker.Models.Bugs.Bug", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "FixedBy")
+                    b.HasOne("BugTracker.Models.ApplicationUser", "FixedBy")
                         .WithMany()
                         .HasForeignKey("FixedById");
 
@@ -339,7 +347,7 @@ namespace BugTracker.Data.Migrations
                         .WithMany("Bugs")
                         .HasForeignKey("ProjectId");
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "ReportedBy")
+                    b.HasOne("BugTracker.Models.ApplicationUser", "ReportedBy")
                         .WithMany()
                         .HasForeignKey("ReportedById");
 
