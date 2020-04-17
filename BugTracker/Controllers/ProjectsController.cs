@@ -1,34 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using BugTracker.Data;
-using BugTracker.Models;
-using BugTracker.Models.Services.Projects;
-using BugTracker.Models.Repositories.Projects;
-using System.Security.Claims;
+﻿using BugTracker.Models;
+using BugTracker.Models.Repositories;
 using BugTracker.Models.Repositories.Users;
+using BugTracker.Models.Services.Projects;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace BugTracker.Controllers
 {
+    [Authorize]
     public class ProjectsController : Controller
     {
-        private readonly ProjectService Service;
-        private readonly IUserRepository userRepository;
+        private readonly IProjectService _projectService;
+        private readonly IUserRepository _userRepository;
 
-        public ProjectsController(IProjectRepository repository, IUserRepository userRepository)
+        public ProjectsController(IRepository<Project> projectRepository,
+                                  IUserRepository userRepository)
         {
-            Service = new ProjectService(repository);
-            this.userRepository = userRepository;
+            _projectService = new ProjectService(projectRepository);
+            this._userRepository = userRepository;
         }
+
+
         public string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
         public async Task<bool> IsUserAuthorizedToAccessProject(int projectId)
         {
             var userId = GetUserId();
-            var isUserInProject = await Service.IsUserInProject(projectId, userId);
+            var isUserInProject = await _projectService.IsUserInProjectAsync(projectId, userId);
             return isUserInProject;
         }
 
@@ -36,7 +37,7 @@ namespace BugTracker.Controllers
         public async Task<IActionResult> Index()
         {
             var userId = GetUserId();
-            var allProjectsRelatedToUser = await Service.GetProjectsRelatedToUser(userId);
+            var allProjectsRelatedToUser = await _projectService.GetProjectsRelatedToUserAsync(userId);
             return View(allProjectsRelatedToUser);
         }
 
@@ -45,10 +46,9 @@ namespace BugTracker.Controllers
         {
             try
             {
-                if (id == null) return NotFound();
                 if (await IsUserAuthorizedToAccessProject(id.Value) == false)
-                    return NoContent();
-                var project = await Service.GetProjectById(id.Value);
+                    return Unauthorized();
+                var project = await _projectService.GetProjectByIdAsync(id.Value,false);
                 return View(project);
             }
             catch (ProjectNotFoundException)
@@ -74,13 +74,14 @@ namespace BugTracker.Controllers
             {
                 try
                 {
-                    var projectId = await Service.AddProject(project);
+                    var projectId = await _projectService.AddProjectAsync(project);
                     var userId = GetUserId();
-                    await Service.AddTeamMember(projectId, userId);
+                    var user = await _userRepository.GetById(userId);
+                    await _projectService.AddUserToProjectAsync(projectId, user);
                 }
                 catch (ProjectNotAddedException)
                 {
-                    throw;
+                    return NotFound();
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -92,10 +93,9 @@ namespace BugTracker.Controllers
         {
             try
             {
-                if (id == null) return NotFound();
                 if (await IsUserAuthorizedToAccessProject(id.Value) == false)
-                    return NoContent();
-                var project = await Service.GetProjectById(id);
+                    return Unauthorized();
+                var project = await _projectService.GetProjectByIdAsync(id);
                 return View(project);
             }
             catch (Exception)
@@ -119,14 +119,14 @@ namespace BugTracker.Controllers
             if (ModelState.IsValid)
             {
                 if (await IsUserAuthorizedToAccessProject(id) == false)
-                    return NoContent();
+                    return Unauthorized();
                 try
                 {
-                    await Service.UpdateProject(project);
+                    await _projectService.UpdateProjectAsync(project);
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (Exception)
                 {
-                    if (!await Service.ProjectExists(project.Id))
+                    if (!await _projectService.ProjectExistsAsync(project.Id))
                     {
                         return NotFound();
                     }
@@ -147,8 +147,8 @@ namespace BugTracker.Controllers
             {
                 if (id == null) return NotFound();
                 if (await IsUserAuthorizedToAccessProject(id.Value) == false)
-                    return NoContent();
-                var project = await Service.GetProjectById(id);
+                    return Unauthorized();
+                var project = await _projectService.GetProjectByIdAsync(id);
                 return View(project);
             }
             catch (Exception)
@@ -162,11 +162,11 @@ namespace BugTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var project = await Service.GetProjectById(id);
+            var project = await _projectService.GetProjectByIdAsync(id);
             if (await IsUserAuthorizedToAccessProject(id) == false)
-                return NoContent();
+                return Unauthorized();
 
-            await Service.DeleteProject(project);
+            await _projectService.DeleteProjectAsync(project);
             return RedirectToAction(nameof(Index));
         }
 

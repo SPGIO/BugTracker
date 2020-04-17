@@ -3,72 +3,77 @@ using BugTracker.Models.Bugs.Severity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace BugTracker.Models.Repositories.Severity
 {
-    public class SeverityRepository : IRepository<BugSeverity>, ISeverityRepository
+    public class SeverityRepository : IRepository<BugSeverity>
     {
         public SeverityRepository(ApplicationDbContext context)
             => Context = context;
 
         public ApplicationDbContext Context { get; set; }
 
+        public void Add(BugSeverity item) => Context.Add(item);
+
+        public async Task AddAsync(BugSeverity item)
+            => await Context.AddAsync(item);
+
+        public void Delete(BugSeverity item) => Context.Remove(item);
+
+        public bool Exists(int id)
+            => Context.BugSeverities.Any(severity => severity.Id == id);
+
+        public async Task<bool> ExistsAsync(int id)
+            => await Context.BugSeverities
+                .AnyAsync(severity => severity.Id == id);
+
+        
+        public IEnumerable<BugSeverity> GetAll(bool asTracking = true)
+            => asTracking
+            ? Context.BugSeverities.AsTracking().ToList()
+            : Context.BugSeverities.AsNoTracking().ToList();
+
+        public async Task<IEnumerable<BugSeverity>> GetAllAsync(bool asTracking = true)
+            => asTracking
+            ? await Context.BugSeverities.AsTracking().ToListAsync()
+            : await Context.BugSeverities.AsNoTracking().ToListAsync();
 
 
-        public int Add(BugSeverity item)
-        {
-            if (item == null) throw new ArgumentNullException();
-            Context.Add(item);
-            return item.Id;
-        }
+       
 
-        public bool Delete(BugSeverity item)
-        {
-            if (item == null) return false;
-            Context.Remove(item);
-            return true;
-        }
+        public BugSeverity GetById(int id, bool asTracking = true)
+            => asTracking
+            ? Context.BugSeverities.AsTracking()
+                                 .SingleOrDefault(severity => severity.Id == id)
+            : Context.BugSeverities.AsNoTracking()
+                                 .SingleOrDefault(severity => severity.Id == id);
 
-        public async Task<IEnumerable<BugSeverity>> GetAll()
-            => await Context.BugSeverities.ToListAsync();
+        public async Task<BugSeverity> GetByIdAsync(int id, bool asTracking = true)
+            => asTracking
+            ? await Context.BugSeverities.AsTracking()
+                                 .SingleOrDefaultAsync(severity => severity.Id == id)
+            : await Context.BugSeverities.AsNoTracking()
+                                 .SingleOrDefaultAsync(severity => severity.Id == id);
 
 
-        public async Task<BugSeverity> GetById(int id)
-        {
-            var severityList =  await GetAll();
-            var severityFound = severityList.FirstOrDefault(bug => bug.Id == id);
-            if (severityFound == null) throw new KeyNotFoundException();
-            return severityFound;
-        }
 
-        public async Task<bool> SaveChangesAsync()
-        {
-            try
-            {
-                await Context.SaveChangesAsync();
-                return true;
-            }
-            catch (Exception exception)
-            {
-                LogError(exception);
-            }
-            return false;
-        }
+        public async Task<IEnumerable<BugSeverity>> GetByQueryAsync(Expression<Func<BugSeverity, bool>> query, bool asTracking = true)
+            => asTracking
+            ? await Context.BugSeverities.Where(query)
+                                         .AsTracking()
+                                         .ToListAsync()
+            : await Context.BugSeverities.Where(query)
+                                         .AsNoTracking()
+                                         .ToListAsync();
 
-        public bool Update(BugSeverity item)
-        {
-            if (item == null) return false;
-            Context.Update(item);
-            return true;
-        }
+        public void SaveChanges() => Context.SaveChanges();
 
-        public async Task<bool> Exists(int id)
-            => await Context.BugSeverities.AnyAsync(severity => severity.Id == id);
+        public async Task SaveChangesAsync()
+            => await Context.SaveChangesAsync();
 
-        public void LogError(Exception exception)
-            => Debug.WriteLine($"Error!\n{exception.Message}");
+        public void Update(BugSeverity item) => Context.Update(item);
     }
 }

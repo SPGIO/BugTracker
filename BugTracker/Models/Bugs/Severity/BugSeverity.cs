@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace BugTracker.Models.Bugs.Severity
+﻿namespace BugTracker.Models.Bugs.Severity
 {
     public class BugSeverity : IBugSeverity
     {

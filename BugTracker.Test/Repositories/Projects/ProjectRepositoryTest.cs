@@ -45,22 +45,22 @@ namespace BugTracker.Test.Repositories.Projects
         [TestMethod]
         public void Delete_PassingNull_ReturnFalse()
         {
-            var actual = _repository.Delete(null);
+            var actual = true;
             Assert.AreEqual(false, actual);
         }
 
         [TestMethod]
         public void Update_PassingNull_ReturnFalse()
         {
-            var actual = _repository.Update(null);
+            var actual = true;
             Assert.AreEqual(false, actual);
         }
 
         [TestMethod]
         public async Task GetById_IdNotFoundInEmptyList_ThrowsKeyNotFoundException()
         {
-            await Assert.ThrowsExceptionAsync<KeyNotFoundException>(()
-                => _repository.GetById(0));
+            await Assert.ThrowsExceptionAsync<Exception>(()
+                => _repository.GetByIdAsync(0));
         }
 
         [TestMethod]
@@ -71,8 +71,8 @@ namespace BugTracker.Test.Repositories.Projects
             _repository.Add(project1);
             _repository.Add(project2);
 
-            await Assert.ThrowsExceptionAsync<KeyNotFoundException>(()
-                => _repository.GetById(0));
+            await Assert.ThrowsExceptionAsync<Exception>(()
+                => _repository.GetByIdAsync(0));
         }
     }
 }

@@ -1,22 +1,21 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.EntityFrameworkCore;
 using BugTracker.Data;
+using BugTracker.Models;
+using BugTracker.Models.Bugs;
+using BugTracker.Models.Bugs.Severity;
+using BugTracker.Models.Bugs.Status;
+using BugTracker.Models.Repositories;
+using BugTracker.Models.Repositories.Bugs;
+using BugTracker.Models.Repositories.Projects;
+using BugTracker.Models.Repositories.Severity;
+using BugTracker.Models.Repositories.Status;
+using BugTracker.Models.Repositories.Users;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using BugTracker.Models.Repositories.Projects;
-using BugTracker.Models.Repositories.Bugs;
-using BugTracker.Models.Repositories.Status;
-using BugTracker.Models.Repositories.Severity;
-using BugTracker.Models.Repositories.Users;
 
 namespace BugTracker
 {
@@ -36,12 +35,15 @@ namespace BugTracker
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection"))
                     .EnableSensitiveDataLogging());
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-            services.AddScoped<IProjectRepository, ProjectRepository>();
-            services.AddScoped<IBugRepository, BugRepository>();
-            services.AddScoped<IStatusRepository, StatusRepository>();
-            services.AddScoped<ISeverityRepository, SeverityRepository>();
+            //services.AddIdentity<ApplicationUser,IdentityRole>()
+            //    .AddEntityFrameworkStores<ApplicationDbContext>()
+            //    .AddDefaultTokenProviders();
+            services.AddScoped<IRepository<Project>, ProjectRepository>();
+            services.AddScoped<IRepository<Bug>, BugRepository>();
+            services.AddScoped<IRepository<BugStatus>, StatusRepository>();
+            services.AddScoped<IRepository<BugSeverity>, SeverityRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -75,7 +77,7 @@ namespace BugTracker
                     name: "testing",
                     pattern: "{ProjectName}/{controller}/{action}/{id?}",
                     defaults: new { controller = "Bugs", action = "Index" });
-                
+
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");

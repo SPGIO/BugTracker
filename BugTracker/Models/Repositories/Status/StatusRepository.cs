@@ -3,13 +3,13 @@ using BugTracker.Models.Bugs.Status;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace BugTracker.Models.Repositories.Status
 {
-    public class StatusRepository : IRepository<BugStatus>, IStatusRepository
+    public class StatusRepository : IRepository<BugStatus>
     {
         public StatusRepository(ApplicationDbContext context)
         {
@@ -18,55 +18,63 @@ namespace BugTracker.Models.Repositories.Status
 
         public ApplicationDbContext Context { get; set; }
 
-        public int Add(BugStatus item)
-        {
-            if (item == null) throw new ArgumentNullException();
-            Context.Add(item);
-            return item.Id;
-        }
+        public void Add(BugStatus item) => Context.Add(item);
 
-        public bool Delete(BugStatus item)
-        {
-            if (item == null) return false;
-            Context.Remove(item);
-            return true;
-        }
+        public async Task AddAsync(BugStatus item)
+            => await Context.AddAsync(item);
 
-        public async Task<IEnumerable<BugStatus>> GetAll()
-            => await Context.BugStatuses.ToListAsync();
+        public void Delete(BugStatus item) => Context.Remove(item);
 
-        public async Task<BugStatus> GetById(int id)
-        {
-            var listOfStatuses = await GetAll();
-            var statusFound = listOfStatuses
-                .FirstOrDefault(status => status.Id == id);
-            if (statusFound == null) throw new KeyNotFoundException();
-            return statusFound;
-        }
-        public async Task<bool> SaveChangesAsync()
-        {
-            try
-            {
-                await Context.SaveChangesAsync();
-                return true;
-            }
-            catch (Exception exception)
-            {
-                LogError(exception);
-            }
-            return false;
-        }
+        public bool Exists(int id)
+            => Context.BugStatuses.Any(status => status.Id == id);
 
-        public bool Update(BugStatus item)
-        {
-            if (item == null) return false;
-            Context.Update(item);
-            return true;
-        }
-        public async Task<bool> Exists(int id)
-           => await Context.BugStatuses.AnyAsync(status => status.Id == id);
+        public async Task<bool> ExistsAsync(int id)
+            => await Context.BugStatuses.AnyAsync(status => status.Id == id);
 
-        public void LogError(Exception exception)
-            => Debug.WriteLine($"Error!\n{exception.Message}");
+ 
+
+        public IEnumerable<BugStatus> GetAll(bool asTracking = true)
+            => asTracking
+            ? Context.BugStatuses.AsTracking().ToList()
+            : Context.BugStatuses.AsNoTracking().ToList();
+
+
+        public async Task<IEnumerable<BugStatus>> GetAllAsync(bool asTracking = true)
+            => asTracking
+            ? await Context.BugStatuses.AsTracking().ToListAsync()
+            : await Context.BugStatuses.AsNoTracking().ToListAsync();
+
+        public BugStatus GetById(int id, bool asTracking = true)
+            => asTracking 
+            ? Context.BugStatuses.AsTracking()
+                                 .SingleOrDefault(Status => Status.Id == id)
+            : Context.BugStatuses.AsNoTracking()
+                                 .SingleOrDefault(Status => Status.Id == id);
+
+        public async Task<BugStatus> GetByIdAsync(int id, bool asTracking = true)
+            => asTracking  
+            ? await Context.BugStatuses
+                                .AsTracking()
+                                .SingleOrDefaultAsync(Status => Status.Id == id) 
+            : await Context.BugStatuses
+                                .AsNoTracking()
+                                .SingleOrDefaultAsync(Status => Status.Id == id);
+
+        public async Task<IEnumerable<BugStatus>> GetByQueryAsync(Expression<Func<BugStatus, bool>> query, bool asTracking = true)
+            => asTracking
+            ? await Context.BugStatuses.Where(query)
+                                       .AsTracking()
+                                       .ToListAsync()
+            : await Context.BugStatuses.Where(query)
+                                       .AsNoTracking()
+                                       .ToListAsync();
+       
+
+        public void SaveChanges() => Context.SaveChanges();
+
+        public async Task SaveChangesAsync()
+            => await Context.SaveChangesAsync();
+
+        public void Update(BugStatus item) => Context.Update(item);
     }
 }

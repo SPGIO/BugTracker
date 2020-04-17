@@ -11,9 +11,9 @@ namespace BugTracker.Models.Bugs
         string Title { get; set; }
         string Description { get; set; }
         string HowToReproduceBug { get; set; }
-        IdentityUser ReportedBy { get; set; }
+        ApplicationUser ReportedBy { get; set; }
         DateTime DateReported { get; set; }
-        IdentityUser FixedBy { get; set; }
+        ApplicationUser FixedBy { get; set; }
         DateTime? DateFixed { get; set; }
         BugStatus Status { get; set; }
         BugSeverity Severity { get; set; }

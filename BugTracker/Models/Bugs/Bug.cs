@@ -19,7 +19,7 @@ namespace BugTracker.Models.Bugs
         public BugStatus Status { get; set; }
         public BugSeverity Severity { get; set; }
 
-        public IdentityUser ReportedBy { get; set; }
-        public IdentityUser FixedBy { get; set; }
+        public ApplicationUser ReportedBy { get; set; }
+        public ApplicationUser FixedBy { get; set; }
     }
 }

@@ -1,40 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using BugTracker.Models;
+using BugTracker.Models.Bugs;
+using BugTracker.Models.Bugs.Severity;
+using BugTracker.Models.Bugs.Status;
+using BugTracker.Models.Repositories;
+using BugTracker.Models.Repositories.Users;
+using BugTracker.Models.Services.Bugs;
+using BugTracker.Models.Services.Projects;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using BugTracker.Data;
-using BugTracker.Models.Bugs;
-using BugTracker.Models.Services.Bugs;
-using BugTracker.Models.Repositories.Bugs;
-using BugTracker.Models.Repositories.Severity;
-using BugTracker.Models.Repositories.Status;
-using BugTracker.Models.Bugs.Severity;
-using BugTracker.Models.Bugs.Status;
+using System;
+using System.Linq;
 using System.Security.Claims;
-using BugTracker.Models.Repositories.Users;
-using BugTracker.Models.Repositories.Projects;
-using BugTracker.Models;
-using BugTracker.Models.Services.Projects;
+using System.Threading.Tasks;
 
 namespace BugTracker.Controllers
 {
+    [Authorize]
     public class BugsController : Controller
     {
         private readonly IBugService bugService;
-        private readonly IStatusRepository statusRepository;
-        private readonly ISeverityRepository severityRepository;
+        private readonly IProjectService projectService;
+        private readonly IRepository<BugStatus> statusRepository;
+        private readonly IRepository<BugSeverity> severityRepository;
+        private readonly IRepository<Project> projectRepository;
         private readonly IUserRepository userRepository;
-        private readonly IProjectRepository projectRepository;
-        private readonly ProjectService projectService;
-        private  Project Project;
-        public BugsController(IBugRepository bugRepository,
-                              IStatusRepository statusRepository,
-                              ISeverityRepository severityRepository,
+        public BugsController(IRepository<Bug> bugRepository,
+                              IRepository<BugStatus> statusRepository,
+                              IRepository<BugSeverity> severityRepository,
                               IUserRepository userRepository,
-                              IProjectRepository projectRepository)
+                              IRepository<Project> projectRepository)
         {
 
             bugService = new BugService(bugRepository);
@@ -43,53 +39,55 @@ namespace BugTracker.Controllers
             this.userRepository = userRepository;
             this.projectRepository = projectRepository;
             this.projectService = new ProjectService(projectRepository);
-            
-            
+
+
         }
 
-        public async Task<Project> GetProjectRelatedToBug(Bug bug)
+        public async Task<IProject> GetProjectRelatedToBug(IBug bug)
         {
-            var allProjects = await projectRepository.GetAll();
+            var allProjects = await projectRepository.GetAllAsync(false);
             return allProjects.First(project => project.Bugs.Contains(bug));
         }
         public string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
-        public async Task<bool> IsUserInProject(string projectName)
+        public async Task<bool> IsUserAuthorizedToAccessProject(int projectId)
         {
-            if (projectName == null) return false;
             var userId = GetUserId();
-            var user = await userRepository.GetById(userId);
-            var allProjects = await projectRepository.GetAll();
-            var project = allProjects.FirstOrDefault(project 
-                                                => project.Name == projectName);
-            return project.Team.Contains(user);
+            var isUserInProject = await projectService
+                .IsUserInProjectAsync(projectId, userId);
+            return isUserInProject;
         }
 
 
         // GET: Bugs
         public async Task<IActionResult> Index(string ProjectName)
         {
-            if (!await IsUserInProject(ProjectName)) return NoContent();
-            IEnumerable<Project> allProjects = projectRepository.GetAll().Result;
-            Project = allProjects.FirstOrDefault(project => project.Name == ProjectName);
-            if (Project == null) return NotFound();
-            return View(Project.Bugs);
+            var project = await projectService.GetProjectByNameAsync(ProjectName, false);
+            if (project == null) return NotFound();
+            var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
+            if (!isUserAuthorized) return Unauthorized();
+            return View(project.Bugs);
         }
 
         // GET: Bugs/Details/5
         public async Task<IActionResult> Details(string ProjectName, int? id)
         {
-            if (!await IsUserInProject(ProjectName)) return NoContent();
             if (id == null) return NotFound();
-            if (await bugService.BugExists(id.Value) == false) return NotFound();
-            var bug = await bugService.GetBugById(id.Value);
+            var project = await projectService.GetProjectByNameAsync(ProjectName, false);
+            var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
+            if (!isUserAuthorized) return Unauthorized();
+            var bugExist = await bugService.BugExistsAsync(id.Value);
+            if (!bugExist) return NotFound();
+            var bug = await bugService.GetBugByIdAsync(id.Value, false);
             return View(bug);
         }
 
         // GET: Bugs/Create
         public async Task<IActionResult> Create(string ProjectName)
         {
-            if (!await IsUserInProject(ProjectName)) return NoContent();
-            var severityList = await severityRepository.GetAll();
+            var project = await projectService.GetProjectByNameAsync(ProjectName, false);
+            var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
+            if (!isUserAuthorized) return Unauthorized();
+            var severityList = await severityRepository.GetAllAsync(false);
             var selectItemSeverityList = severityList.Select(bugSeverity => new SelectListItem(bugSeverity.Name, bugSeverity.Id.ToString()));
             ViewBag.Severities = selectItemSeverityList;
             return View();
@@ -102,25 +100,21 @@ namespace BugTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(string ProjectName, [Bind("Id,Title,Description,HowToReproduceBug,DateReported,ReportedBy,Severity,Status")] Bug bug)
         {
-            if (!await IsUserInProject(ProjectName)) return NoContent();
+            var project = await projectService.GetProjectByNameAsync(ProjectName);
+            var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
+            if (!isUserAuthorized) return Unauthorized();
             if (!ModelState.IsValid) return View(bug);
 
             try
             {
-                var severityIdString = Request.Form["Severity"].ToString();
-                var severityId = int.Parse(severityIdString);
-                var severity = await severityRepository.GetById(severityId);
-
-                var statuses = await statusRepository.GetAll();
-                var status = statuses.First(status => status.Name.ToLower() == "open");
-                bug.Severity = severity;
-                bug.Status = status;
-
-                string userid = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+                string userid = GetUserId();
                 var user = await userRepository.GetById(userid);
                 bug.ReportedBy = user;
+                await bugService.AddBugAsync(bug);
+                
+                project.Bugs.Add(bug);
+                await projectService.UpdateProjectAsync(project);
 
-                await bugService.AddBug(bug);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception)
@@ -133,17 +127,25 @@ namespace BugTracker.Controllers
         // GET: Bugs/Edit/5
         public async Task<IActionResult> Edit(string ProjectName, int? id)
         {
-            var statusList = await statusRepository.GetAll();
-            var selectItemStatusList = statusList.Select(bugStatus => new SelectListItem(bugStatus.Name, bugStatus.Id.ToString()));
+            if (id == null) return NotFound();
+
+            var project = await projectService.GetProjectByNameAsync(ProjectName, false);
+            var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
+            if (!isUserAuthorized) return Unauthorized();
+
+            if (await bugService.BugExistsAsync(id.Value) == false) return NotFound();
+            var bug = await bugService.GetBugByIdAsync(id);
+            if (bug == null) throw new Exception();
+            var statusList = await statusRepository.GetAllAsync(false);
+            var selectItemStatusList = statusList.Select(bugStatus => new SelectListItem(bugStatus.Name, bugStatus.Id.ToString(), bug.Status.Name == bugStatus.Name));
             ViewBag.Statuses = selectItemStatusList;
 
-            var severityList = await severityRepository.GetAll();
-            var selectItemSeverityList = severityList.Select(bugSeverity => new SelectListItem(bugSeverity.Name, bugSeverity.Id.ToString()));
+
+            var severityList = await severityRepository.GetAllAsync(false);
+            var selectItemSeverityList = severityList.Select(bugSeverity => new SelectListItem(bugSeverity.Name, bugSeverity.Id.ToString(), bug.Severity.Name == bugSeverity.Name));
+            selectItemSeverityList.First(severity => severity.Value == bug.Severity.Id.ToString()).Selected = true;
             ViewBag.Severities = selectItemSeverityList;
 
-            if (id == null) return NotFound();
-            if (await bugService.BugExists(id.Value) == false) return NotFound();
-            var bug = await bugService.GetBugById(id);
             return View(bug);
         }
 
@@ -154,28 +156,24 @@ namespace BugTracker.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string ProjectName, int id, [Bind("Id,Title,Description,HowToReproduceBug,DateReported,ReportedBy,DateFixed,FixedBy")] Bug bug)
+        public async Task<IActionResult> Edit(string ProjectName, int id, [Bind("Id,Title,Description,HowToReproduceBug,DateReported,ReportedBy, Status, Severity, DateFixed,FixedBy")] Bug bug)
         {
-            if (!await IsUserInProject(ProjectName)) return NoContent();
+            // , [Bind("Status")] int StatusId, [Bind("Severity")] int SeverityId
+            var project = await projectService.GetProjectByNameAsync(ProjectName, false);
+            
+            var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
+            if (!isUserAuthorized) return Unauthorized();
             if (id != bug.Id) return NotFound();
             if (!ModelState.IsValid) return View(bug);
+            bug.Severity = await severityRepository.GetByIdAsync(bug.Severity.Id, false);
+            bug.Status = await statusRepository.GetByIdAsync(bug.Status.Id, false);
             try
             {
-                var severityIdString = Request.Form["Severity"].ToString();
-                var severityId = int.Parse(severityIdString);
-                var severity = await severityRepository.GetById(severityId);
-
-                var statusIdString = Request.Form["Status"].ToString();
-                var statusId = int.Parse(statusIdString);
-                var status = await statusRepository.GetById(statusId);
-
-                bug.Severity = severity;
-                bug.Status = status;
-                await bugService.UpdateBug(bug);
+                await bugService.UpdateBugAsync(bug);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (await bugService.BugExists(bug.Id)) throw;
+                if (await bugService.BugExistsAsync(bug.Id)) throw;
                 return NotFound();
             }
             return RedirectToAction(nameof(Index));
@@ -184,10 +182,12 @@ namespace BugTracker.Controllers
         // GET: Bugs/Delete/5
         public async Task<IActionResult> Delete(string ProjectName, int? id)
         {
-            if (!await IsUserInProject(ProjectName)) return NoContent();
             if (id == null) return NotFound();
-            if (await bugService.BugExists(id.Value) == false) return NotFound();
-            var bug = await bugService.GetBugById(id);
+            var project = await projectService.GetProjectByNameAsync(ProjectName, false);
+            var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
+            if (!isUserAuthorized) return Unauthorized();
+            if (await bugService.BugExistsAsync(id.Value) == false) return NotFound();
+            var bug = await bugService.GetBugByIdAsync(id, false);
             return View(bug);
         }
 
@@ -196,9 +196,11 @@ namespace BugTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string ProjectName, int id)
         {
-            if (!await IsUserInProject(ProjectName)) return NoContent();
-            var bug = await bugService.GetBugById(id);
-            await bugService.DeleteBug(bug);
+            var project = await projectService.GetProjectByNameAsync(ProjectName, false);
+            var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
+            if (!isUserAuthorized) return Unauthorized();
+            var bug = await bugService.GetBugByIdAsync(id);
+            await bugService.DeleteBugAsync(bug);
             return RedirectToAction(nameof(Index));
         }
     }

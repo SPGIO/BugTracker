@@ -1,13 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BugTracker.Models
 {
     public class ApplicationUser : IdentityUser
     {
-
+        public ApplicationUser() => Projects = new HashSet<Project>();
+        public virtual ICollection<Project> Projects { get; set; }
     }
 }

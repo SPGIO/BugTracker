@@ -26,10 +26,11 @@
     <div class="row">
         <div class="col">
             <table>
-                @foreach(var user in Model.Team)
+                @foreach(var userProject in Model.Team)
                 {
                     <tr>
-                        <td>@user.Email</td>
+                        <td>@userProject.User.Email</td>
+                        @*<td>@user.Email</td>*@
                     </tr>
                 }
             </table>

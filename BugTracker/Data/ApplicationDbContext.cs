@@ -8,20 +8,28 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BugTracker.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
-        {            
-            
+        {
+
         }
 
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<UserProjects>()
+                   .HasKey(userProject => 
+                        new { userProject.UserId, userProject.ProjectId });
+           
+        }
 
 
 
         public DbSet<Bug> Bugs { get; set; }
         public DbSet<Project> Projects { get; set; }
-        public DbSet<IdentityUser> Users { get; set; }
         public DbSet<BugSeverity> BugSeverities { get; set; }
         public DbSet<BugStatus> BugStatuses { get; set; }
     }

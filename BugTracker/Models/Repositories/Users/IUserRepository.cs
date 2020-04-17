@@ -9,8 +9,8 @@ namespace BugTracker.Models.Repositories.Users
     {
         ApplicationDbContext Context { get; set; }
 
-        Task<IEnumerable<IdentityUser>> GetAll();
-        Task<IdentityUser> GetById(string id);
-        Task<IdentityUser> GetByUsername(string username);
+        Task<IEnumerable<ApplicationUser>> GetAll();
+        Task<ApplicationUser> GetById(string id);
+        Task<ApplicationUser> GetByUsername(string username);
     }
 }
