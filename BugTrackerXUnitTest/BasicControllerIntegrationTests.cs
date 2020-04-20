@@ -33,28 +33,22 @@ namespace BugTrackerXUnitTest
                 response.Content.Headers.ContentType.ToString());
         }
 
-        [Theory]
-        [InlineData("Projects/")]
-        [InlineData("Projects/Edit/13")]
-        [InlineData("Projects/Details/13")]
-        [InlineData("Projects/Delete/13")]
-        [InlineData("BugTracker/Bugs/Create")]
-        [InlineData("BugTracker/Bugs/Edit/2")]
-        [InlineData("BugTracker/Bugs/Details/2")]
-        [InlineData("BugTracker/Bugs/Delete/2")]
-        public async Task Get_EndpointsReturnUnauthorized(string url)
-        {
-            // Arrange
-            var client = _factory.CreateClient();
+        //[Theory]
+        //[InlineData("Projects/")]
+        //[InlineData("BugTracker/Bugs/Create")]
+        //public async Task Get_EndpointsReturnUnauthorized(string url)
+        //{
+        //    // Arrange
+        //    var client = _factory.CreateClient();
 
-            // Act
-            var response = await client.GetAsync(url);
-            var actual = response.StatusCode;
+        //    // Act
+        //    var response = await client.GetAsync(url);
+        //    var actual = response.StatusCode;
 
-            // Assert
-            var expected = System.Net.HttpStatusCode.Unauthorized;
-            Assert.Equal(expected, actual);
-        }
+        //    // Assert
+        //    var expected = System.Net.HttpStatusCode.Unauthorized;
+        //    Assert.Equal(expected, actual);
+        //}
 
 
     }

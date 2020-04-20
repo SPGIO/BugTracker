@@ -4,6 +4,22 @@ namespace BugTracker.Models.Users
 {
     public class ApplicationUser : IdentityUser
     {
-        public virtual IEnumerable<UserProjects> Projects { get; set; }
+        private ICollection<UserProjects> projects;
+
+        public ApplicationUser()
+        {
+            Projects = new List<UserProjects>();
+        }
+
+        public virtual ICollection<UserProjects> Projects
+        {
+            get { return projects; }
+            set
+            {
+                if (value == null) projects = new List<UserProjects>();
+                else projects = value;
+
+            }
+        }
     }
 }

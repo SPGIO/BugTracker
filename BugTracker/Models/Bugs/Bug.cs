@@ -1,5 +1,6 @@
 ﻿using BugTracker.Models.Bugs.Severity;
 using BugTracker.Models.Bugs.Status;
+using BugTracker.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -21,5 +22,13 @@ namespace BugTracker.Models.Bugs
 
         public ApplicationUser ReportedBy { get; set; }
         public ApplicationUser FixedBy { get; set; }
+
+        private int NumberOfDaysUntilOld = 2;
+
+        private int GetDaysFromToday(DateTime date) 
+            => (int)DateTime.Now.Subtract(date).TotalDays;
+
+        public bool IsNew() 
+            => (GetDaysFromToday(DateReported) < NumberOfDaysUntilOld);
     }
 }

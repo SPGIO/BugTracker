@@ -32,7 +32,9 @@ namespace BugTracker.Models.Repositories.Projects
                                .ThenInclude(bug => bug.Severity)
                            .Include(project => project.Bugs)
                                .ThenInclude(bug => bug.Status)
-                           .Include(project => project.Team);
+                           .Include(project => project.Team)
+                           .Include(project => project.Bugs)
+                               .ThenInclude(bug => bug.ReportedBy);
             if (asTracking)
                 return await query.AsTracking().ToListAsync();
             return await query.AsNoTracking().ToListAsync();

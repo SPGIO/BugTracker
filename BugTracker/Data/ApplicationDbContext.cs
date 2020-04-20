@@ -2,6 +2,7 @@
 using BugTracker.Models.Bugs;
 using BugTracker.Models.Bugs.Severity;
 using BugTracker.Models.Bugs.Status;
+using BugTracker.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

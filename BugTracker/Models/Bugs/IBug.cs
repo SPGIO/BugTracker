@@ -1,5 +1,6 @@
 ﻿using BugTracker.Models.Bugs.Severity;
 using BugTracker.Models.Bugs.Status;
+using BugTracker.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using System;
 
@@ -18,6 +19,7 @@ namespace BugTracker.Models.Bugs
         BugStatus Status { get; set; }
         BugSeverity Severity { get; set; }
 
+        bool IsNew();
 
     }
 }

@@ -65,7 +65,7 @@ namespace BugTracker.Controllers
             if (project == null) return NotFound();
             var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
             if (!isUserAuthorized) return Unauthorized();
-            return View(project.Bugs);
+            return View(project.Bugs.OrderByDescending(bug => bug.DateReported));
         }
 
         // GET: Bugs/Details/5
@@ -98,7 +98,7 @@ namespace BugTracker.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(string ProjectName, [Bind("Id,Title,Description,HowToReproduceBug,DateReported,ReportedBy,Severity,Status")] Bug bug)
+        public async Task<IActionResult> Create(string ProjectName, [Bind("Id,Title,Description,HowToReproduceBug,Severity,Status")] Bug bug)
         {
             var project = await projectService.GetProjectByNameAsync(ProjectName);
             var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
@@ -110,6 +110,7 @@ namespace BugTracker.Controllers
                 string userid = GetUserId();
                 var user = await userRepository.GetById(userid);
                 bug.ReportedBy = user;
+                bug.DateReported = DateTime.Now;
                 await bugService.AddBugAsync(bug);
                 
                 project.Bugs.Add(bug);

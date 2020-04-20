@@ -5,5 +5,6 @@
         int Id { get; set; }
         int Priority { get; set; }
         string Name { get; set; }
+        string Color { get; set; }
     }
 }
