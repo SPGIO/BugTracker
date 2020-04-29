@@ -30,25 +30,25 @@ namespace BugTracker.Controllers
                               IRepository<BugStatus> statusRepository,
                               IRepository<BugSeverity> severityRepository,
                               IUserRepository userRepository,
-                              IRepository<Project> projectRepository)
+                              IProjectService projectRepository)
         {
 
             bugService = new BugService(bugRepository);
             this.statusRepository = statusRepository;
             this.severityRepository = severityRepository;
             this.userRepository = userRepository;
-            this.projectRepository = projectRepository;
-            this.projectService = new ProjectService(projectRepository);
+            this.projectService = projectRepository;
 
 
         }
 
         public async Task<IProject> GetProjectRelatedToBug(IBug bug)
         {
-            var allProjects = await projectRepository.GetAllAsync(false);
+            var allProjects = await projectRepository.GetAllAsync();
             return allProjects.First(project => project.Bugs.Contains(bug));
         }
         public string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
+        
         public async Task<bool> IsUserAuthorizedToAccessProject(int projectId)
         {
             var userId = GetUserId();
@@ -61,7 +61,7 @@ namespace BugTracker.Controllers
         // GET: Bugs
         public async Task<IActionResult> Index(string ProjectName)
         {
-            var project = await projectService.GetProjectByNameAsync(ProjectName, false);
+            var project = await projectService.GetProjectByNameAsync(ProjectName);
             if (project == null) return NotFound();
             var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
             if (!isUserAuthorized) return Unauthorized();
@@ -72,7 +72,7 @@ namespace BugTracker.Controllers
         public async Task<IActionResult> Details(string ProjectName, int? id)
         {
             if (id == null) return NotFound();
-            var project = await projectService.GetProjectByNameAsync(ProjectName, false);
+            var project = await projectService.GetProjectByNameAsync(ProjectName);
             var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
             if (!isUserAuthorized) return Unauthorized();
             var bugExist = await bugService.BugExistsAsync(id.Value);
@@ -84,10 +84,10 @@ namespace BugTracker.Controllers
         // GET: Bugs/Create
         public async Task<IActionResult> Create(string ProjectName)
         {
-            var project = await projectService.GetProjectByNameAsync(ProjectName, false);
+            var project = await projectService.GetProjectByNameAsync(ProjectName);
             var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
             if (!isUserAuthorized) return Unauthorized();
-            var severityList = await severityRepository.GetAllAsync(false);
+            var severityList = await severityRepository.GetAllAsync();
             var selectItemSeverityList = severityList.Select(bugSeverity => new SelectListItem(bugSeverity.Name, bugSeverity.Id.ToString()));
             ViewBag.Severities = selectItemSeverityList;
             return View();
@@ -100,21 +100,19 @@ namespace BugTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(string ProjectName, [Bind("Id,Title,Description,HowToReproduceBug,Severity,Status")] Bug bug)
         {
-            var project = await projectService.GetProjectByNameAsync(ProjectName);
-            var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
-            if (!isUserAuthorized) return Unauthorized();
-            if (!ModelState.IsValid) return View(bug);
-
             try
             {
+                var project = await projectService.GetProjectByNameAsync(ProjectName);
+                bool projectExists = projectService.ProjectExists(project.Id);
+                var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
+                if (!isUserAuthorized) return Unauthorized();
+                if (!ModelState.IsValid) return View(bug);
                 string userid = GetUserId();
                 var user = await userRepository.GetById(userid);
                 bug.ReportedBy = user;
-                bug.DateReported = DateTime.Now;
                 await bugService.AddBugAsync(bug);
-                
-                project.Bugs.Add(bug);
-                await projectService.UpdateProjectAsync(project);
+
+                await projectService.AddBugReportToProject(project.Id, bug);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -130,19 +128,19 @@ namespace BugTracker.Controllers
         {
             if (id == null) return NotFound();
 
-            var project = await projectService.GetProjectByNameAsync(ProjectName, false);
+            var project = await projectService.GetProjectByNameAsync(ProjectName);
             var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
             if (!isUserAuthorized) return Unauthorized();
 
             if (await bugService.BugExistsAsync(id.Value) == false) return NotFound();
             var bug = await bugService.GetBugByIdAsync(id);
             if (bug == null) throw new Exception();
-            var statusList = await statusRepository.GetAllAsync(false);
+            var statusList = await statusRepository.GetAllAsync();
             var selectItemStatusList = statusList.Select(bugStatus => new SelectListItem(bugStatus.Name, bugStatus.Id.ToString(), bug.Status.Name == bugStatus.Name));
             ViewBag.Statuses = selectItemStatusList;
 
 
-            var severityList = await severityRepository.GetAllAsync(false);
+            var severityList = await severityRepository.GetAllAsync();
             var selectItemSeverityList = severityList.Select(bugSeverity => new SelectListItem(bugSeverity.Name, bugSeverity.Id.ToString(), bug.Severity.Name == bugSeverity.Name));
             selectItemSeverityList.First(severity => severity.Value == bug.Severity.Id.ToString()).Selected = true;
             ViewBag.Severities = selectItemSeverityList;
@@ -160,14 +158,14 @@ namespace BugTracker.Controllers
         public async Task<IActionResult> Edit(string ProjectName, int id, [Bind("Id,Title,Description,HowToReproduceBug,DateReported,ReportedBy, Status, Severity, DateFixed,FixedBy")] Bug bug)
         {
             // , [Bind("Status")] int StatusId, [Bind("Severity")] int SeverityId
-            var project = await projectService.GetProjectByNameAsync(ProjectName, false);
-            
+            var project = await projectService.GetProjectByNameAsync(ProjectName);
+
             var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
             if (!isUserAuthorized) return Unauthorized();
             if (id != bug.Id) return NotFound();
             if (!ModelState.IsValid) return View(bug);
-            bug.Severity = await severityRepository.GetByIdAsync(bug.Severity.Id, false);
-            bug.Status = await statusRepository.GetByIdAsync(bug.Status.Id, false);
+            bug.Severity = await severityRepository.GetByIdAsync(bug.Severity.Id);
+            bug.Status = await statusRepository.GetByIdAsync(bug.Status.Id);
             try
             {
                 await bugService.UpdateBugAsync(bug);
@@ -184,7 +182,7 @@ namespace BugTracker.Controllers
         public async Task<IActionResult> Delete(string ProjectName, int? id)
         {
             if (id == null) return NotFound();
-            var project = await projectService.GetProjectByNameAsync(ProjectName, false);
+            var project = await projectService.GetProjectByNameAsync(ProjectName);
             var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
             if (!isUserAuthorized) return Unauthorized();
             if (await bugService.BugExistsAsync(id.Value) == false) return NotFound();
@@ -197,7 +195,7 @@ namespace BugTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string ProjectName, int id)
         {
-            var project = await projectService.GetProjectByNameAsync(ProjectName, false);
+            var project = await projectService.GetProjectByNameAsync(ProjectName);
             var isUserAuthorized = await IsUserAuthorizedToAccessProject(project.Id);
             if (!isUserAuthorized) return Unauthorized();
             var bug = await bugService.GetBugByIdAsync(id);

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -19,8 +20,18 @@ using Xunit;
 
 namespace BugTrackerXUnitTest
 {
-    public class ProjectControllerTest
+    public class ProjectControllerTest : IDisposable
     {
+        Mock<IProjectService> mockService; 
+        public ProjectControllerTest()
+        {
+            mockService = new Mock<IProjectService>();
+        }
+
+        public void Dispose()
+        {
+            mockService.VerifyAll();
+        }
 
         public List<Project> GetProjectStub()
         {
@@ -29,7 +40,7 @@ namespace BugTrackerXUnitTest
             var user = new ApplicationUser();
             user.Id = userId;
             user.UserName = username;
-            
+
             var project1 = new Project(){ Id = 1 };
             var projectRelation1 = new UserProjects()
             {
@@ -40,7 +51,7 @@ namespace BugTrackerXUnitTest
             };
             project1.Team.Add(projectRelation1);
             user.Projects.Add(projectRelation1);
-            
+
             var project2 = new Project(){ Id = 2 };
             var projectRelation2 = new UserProjects()
             {
@@ -76,9 +87,8 @@ namespace BugTrackerXUnitTest
         public async Task Index_ActionExecutes_ReturnsViewForIndex()
         {
             // Arrange
-            var repo = new Mock<IRepository<Project>>();
             var userRepo = new Mock<IUserRepository>();
-            var controller = new ProjectsController(repo.Object, userRepo.Object);
+            var controller = new ProjectsController(mockService.Object, userRepo.Object);
 
             string userId = "1234";
             string username = "Test dummy";
@@ -90,16 +100,18 @@ namespace BugTrackerXUnitTest
             var result = await controller.Index();
 
             // Assert
-            Assert.IsType<ViewResult>(result);
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var model = Assert.IsAssignableFrom<IEnumerable<Project>>(
+                viewResult.ViewData.Model);
+            Assert.Empty(model);
         }
 
         [Fact]
         public async Task Index_ActionExecutes_ReturnsExactNumberOfProjects()
         {
             // Arrange
-            var mockProjectRepository = new Mock<IRepository<Project>>();
             var mockUserRepository = new Mock<IUserRepository>();
-            var controller = new ProjectsController(mockProjectRepository.Object, mockUserRepository.Object);
+            var controller = new ProjectsController(mockService.Object, mockUserRepository.Object);
 
             string userId = "1234";
             string username = "Test dummy";
@@ -108,8 +120,8 @@ namespace BugTrackerXUnitTest
                 new DefaultHttpContext { User = testUser };
 
             var projectsStub = GetProjectStub();
-            mockProjectRepository
-                .Setup(repo => repo.GetAllAsync(It.IsAny<bool>()))
+            mockService
+                .Setup(service => service.GetProjectsRelatedToUserAsync(userId))
                 .ReturnsAsync(projectsStub);
 
             // Act
@@ -117,12 +129,68 @@ namespace BugTrackerXUnitTest
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
-            var projects = Assert.IsAssignableFrom<IEnumerable<Project>>(viewResult.Model);
+            var projects = Assert.IsAssignableFrom<IEnumerable<Project>>(
+                viewResult.ViewData.Model);
+            Assert.Equal(2, projects.Count());
+            mockService.Verify();
+        }
+
+        [Fact]
+        public async Task Index_ActionExecutes_NotLoggedIn()
+        {
+            // Arrange
+            var mockUserRepository = new Mock<IUserRepository>();
+            var controller = new ProjectsController(mockService.Object, mockUserRepository.Object);
+            string userId = "1234";
+            string username = "Test dummy";
+            var testUser = GetTestUser(userId, username);
+            controller.ControllerContext.HttpContext =
+                new DefaultHttpContext { User = testUser };
+
+            var projectsStub = GetProjectStub();
+            mockService
+                .Setup(service => service.GetProjectsRelatedToUserAsync(userId))
+                .ReturnsAsync(projectsStub);
+
+            // Act
+            var result = await controller.Index();
+
+            // Assert
+            Assert.IsType<ViewResult>(result);
+        }
+
+
+
+        [Fact]
+        public async Task Details_ActionExecutes_IdIsNull()
+        {
+            // Arrange
+            var mockUserRepository = new Mock<IUserRepository>();
+            var controller = new ProjectsController(mockService.Object, mockUserRepository.Object);
+
+            string userId = "1234";
+            string username = "Test dummy";
+            var testUser = GetTestUser(userId, username);
+            controller.ControllerContext.HttpContext =
+                    new DefaultHttpContext
+                    {
+                        User = testUser
+                    };
+
+            var projectsStub = GetProjectStub();
+            mockService
+                .Setup(service => service.GetProjectsRelatedToUserAsync(userId))
+                .ReturnsAsync(projectsStub);
+
+            // Act
+            var result = await controller.Index();
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var projects = Assert.IsAssignableFrom<IEnumerable<Project>>(
+                viewResult.ViewData.Model);
             Assert.Equal(2, projects.Count());
         }
-    
-    
-        
 
     }
 }

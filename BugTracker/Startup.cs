@@ -9,6 +9,7 @@ using BugTracker.Models.Repositories.Projects;
 using BugTracker.Models.Repositories.Severity;
 using BugTracker.Models.Repositories.Status;
 using BugTracker.Models.Repositories.Users;
+using BugTracker.Models.Services.Projects;
 using BugTracker.Models.Users;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -45,6 +46,7 @@ namespace BugTracker
             services.AddScoped<IRepository<BugStatus>, StatusRepository>();
             services.AddScoped<IRepository<BugSeverity>, SeverityRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IProjectService, ProjectService>();
             services.AddControllersWithViews();
             services.AddRazorPages();
         }

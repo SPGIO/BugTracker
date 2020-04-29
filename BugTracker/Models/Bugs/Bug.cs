@@ -11,24 +11,76 @@ namespace BugTracker.Models.Bugs
     {
         public int Id { get; set; }
         [Required]
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public string HowToReproduceBug { get; set; }
+        public string Title
+        {
+            get => title;
+            set => title = value ?? string.Empty;
+        }
+        public string Description
+        {
+            get => description;
+            set => description = value ?? string.Empty;
+        }
+        public string HowToReproduceBug
+        {
+            get => howToReproduceBug;
+            set => howToReproduceBug = value ?? string.Empty;
+        }
         [Required]
         public DateTime DateReported { get; set; }
         public DateTime? DateFixed { get; set; }
-        public BugStatus Status { get; set; }
-        public BugSeverity Severity { get; set; }
+        public BugStatus Status
+        {
+            get => status ?? nothingSelectedStatus;
+            set => status = value ?? nothingSelectedStatus;
+        }
+        public BugSeverity Severity
+        {
+            get => severity ?? nothingSelectedSeverity;
+            set => severity = value ?? nothingSelectedSeverity;
+        }
 
-        public ApplicationUser ReportedBy { get; set; }
-        public ApplicationUser FixedBy { get; set; }
+        public ApplicationUser? ReportedBy { get; set; }
+        public ApplicationUser? FixedBy { get; set; }
 
         private int NumberOfDaysUntilOld = 2;
+        private string title;
+        private string description;
+        private string howToReproduceBug;
+        private BugStatus? status;
+        private BugSeverity? severity;
+        private readonly BugStatus nothingSelectedStatus =  new BugStatus()
+        {
+            Id = -1,
+            Name = "Nothing selected",
+            Priority = -1,
+            Color = "#fff"
+        };
 
-        private int GetDaysFromToday(DateTime date) 
-            => (int)DateTime.Now.Subtract(date).TotalDays;
+        private readonly BugSeverity nothingSelectedSeverity =  new BugSeverity()
+        {
+            Id = -1,
+            Name = "Nothing selected",
+            Priority = -1,
+            Color = "#fff"
+        };
 
-        public bool IsNew() 
+
+        public Bug()
+        {
+            DateReported = DateTime.Now;
+            title = string.Empty;
+            description = string.Empty;
+            howToReproduceBug = string.Empty;
+            Status = nothingSelectedStatus;
+            Severity = nothingSelectedSeverity;
+
+        }
+
+        public int GetDaysFromToday(DateTime date)
+            => (int) DateTime.Now.Subtract(date).TotalDays;
+
+        public bool IsNew()
             => (GetDaysFromToday(DateReported) < NumberOfDaysUntilOld);
     }
 }

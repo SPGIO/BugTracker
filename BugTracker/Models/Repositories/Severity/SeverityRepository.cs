@@ -31,43 +31,37 @@ namespace BugTracker.Models.Repositories.Severity
                 .AnyAsync(severity => severity.Id == id);
 
         
-        public IEnumerable<BugSeverity> GetAll(bool asTracking = true)
-            => asTracking
-            ? Context.BugSeverities.AsTracking().ToList()
-            : Context.BugSeverities.AsNoTracking().ToList();
+        public IEnumerable<BugSeverity> GetAll()
+            => Context.BugSeverities.AsNoTracking().ToList();
 
-        public async Task<IEnumerable<BugSeverity>> GetAllAsync(bool asTracking = true)
-            => asTracking
-            ? await Context.BugSeverities.AsTracking().ToListAsync()
-            : await Context.BugSeverities.AsNoTracking().ToListAsync();
+        public async Task<IEnumerable<BugSeverity>> GetAllAsync()
+            => await Context.BugSeverities.AsNoTracking().ToListAsync();
 
 
        
 
-        public BugSeverity GetById(int id, bool asTracking = true)
-            => asTracking
-            ? Context.BugSeverities.AsTracking()
-                                 .SingleOrDefault(severity => severity.Id == id)
-            : Context.BugSeverities.AsNoTracking()
+        public BugSeverity GetById(int id)
+            => Context.BugSeverities.AsNoTracking()
                                  .SingleOrDefault(severity => severity.Id == id);
 
-        public async Task<BugSeverity> GetByIdAsync(int id, bool asTracking = true)
-            => asTracking
-            ? await Context.BugSeverities.AsTracking()
-                                 .SingleOrDefaultAsync(severity => severity.Id == id)
-            : await Context.BugSeverities.AsNoTracking()
+        public async Task<BugSeverity> GetByIdAsync(int id)
+            => await Context.BugSeverities.AsNoTracking()
                                  .SingleOrDefaultAsync(severity => severity.Id == id);
 
 
 
-        public async Task<IEnumerable<BugSeverity>> GetByQueryAsync(Expression<Func<BugSeverity, bool>> query, bool asTracking = true)
-            => asTracking
-            ? await Context.BugSeverities.Where(query)
-                                         .AsTracking()
-                                         .ToListAsync()
-            : await Context.BugSeverities.Where(query)
+        public async Task<IEnumerable<BugSeverity>> GetByQueryAsync(Expression<Func<BugSeverity, bool>> query)
+            => await Context.BugSeverities.Where(query)
                                          .AsNoTracking()
                                          .ToListAsync();
+
+        public BugSeverity GetEditableById(int id)
+        => Context.BugSeverities.AsTracking()
+                        .SingleOrDefault(severity => severity.Id == id);
+
+        public async Task<BugSeverity> getEditableByIdAsync(int id)
+        => await Context.BugSeverities.AsTracking()
+                        .SingleOrDefaultAsync(severity => severity.Id == id);
 
         public void SaveChanges() => Context.SaveChanges();
 

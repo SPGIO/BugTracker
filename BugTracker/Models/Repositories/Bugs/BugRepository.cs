@@ -14,25 +14,23 @@ namespace BugTracker.Models.Repositories.Bugs
         public ApplicationDbContext Context { get; set; }
         public BugRepository(ApplicationDbContext context) => Context = context;
 
-        public IEnumerable<Bug> GetAll(bool asTracking = true) => Context.Bugs
-                .Include(bug => bug.Status)
-                .Include(bug => bug.Severity)
-                .Include(bug => bug.ReportedBy)
-                .Include(bug => bug.FixedBy)
-                .ToList();
+        public IEnumerable<Bug> GetAll() 
+            => Context.Bugs.Include(bug => bug.Status)
+                           .Include(bug => bug.Severity)
+                           .Include(bug => bug.ReportedBy)
+                           .Include(bug => bug.FixedBy)
+                           .AsNoTracking()
+                           .ToList();
 
 
 
-        public async Task<IEnumerable<Bug>> GetAllAsync(bool asTracking = true)
-        {
-            var query = Context.Bugs.Include(bug => bug.Status)
-                                    .Include(bug => bug.Severity)
-                                    .Include(bug => bug.ReportedBy)
-                                    .Include(bug => bug.FixedBy);
-            if (asTracking)
-                return await query.AsTracking().ToListAsync();
-            return await query.AsNoTracking().ToListAsync();
-        }
+        public async Task<IEnumerable<Bug>> GetAllAsync() 
+            => await Context.Bugs.Include(bug => bug.Status)
+                                 .Include(bug => bug.Severity)
+                                 .Include(bug => bug.ReportedBy)
+                                 .Include(bug => bug.FixedBy)
+                                 .AsNoTracking()
+                                 .ToListAsync();
 
         public void Add(Bug item) => Context.Add(item);
 
@@ -52,43 +50,47 @@ namespace BugTracker.Models.Repositories.Bugs
             => await Context.Bugs.AnyAsync(bug => bug.Id == id);
 
         public bool Exists(int id) => Context.Bugs.Any(bug => bug.Id == id);
-     
 
-        public async Task<Bug> GetByIdAsync(int id, bool asTracking = true)
-        {
-            var query = Context.Bugs
-                .Include(bug => bug.Status)
-                .Include(bug => bug.Severity)
-                .Include(bug => bug.ReportedBy)
-                .Include(bug => bug.FixedBy);
-            if (asTracking)
-                return await query.AsTracking().FirstOrDefaultAsync(bug => bug.Id == id);
-            return await query.AsNoTracking().FirstOrDefaultAsync(bug => bug.Id == id);
-        }
 
-        public async Task<IEnumerable<Bug>> GetByQueryAsync(Expression<Func<Bug, bool>> query, bool asTracking = true)
-        {
-            var thisQuery = Context.Bugs
+        public async Task<Bug> GetByIdAsync(int id) 
+            => await Context.Bugs.Include(bug => bug.Status)
+                                 .Include(bug => bug.Severity)
+                                 .Include(bug => bug.ReportedBy)
+                                 .Include(bug => bug.FixedBy)
+                                 .AsNoTracking()
+                                 .FirstOrDefaultAsync(bug => bug.Id == id);
+
+        public async Task<IEnumerable<Bug>> GetByQueryAsync(Expression<Func<Bug, bool>> query) 
+            => await Context.Bugs.Include(bug => bug.Status)
+                                 .Include(bug => bug.Severity)
+                                 .Include(bug => bug.ReportedBy)
+                                 .Include(bug => bug.FixedBy)
+                                 .Where(query)
+                                 .AsNoTracking()
+                                 .ToListAsync();
+
+        public Bug GetById(int id) => Context.Bugs
                 .Include(bug => bug.Status)
                 .Include(bug => bug.Severity)
                 .Include(bug => bug.ReportedBy)
                 .Include(bug => bug.FixedBy)
-                .Where(query);
-            if (asTracking)
-                return await thisQuery.AsTracking().ToListAsync();
-            return await thisQuery.AsNoTracking().ToListAsync();
-        }
+                .AsNoTracking()
+                .FirstOrDefault(bug => bug.Id == id);
 
-        public Bug GetById(int id, bool asTracking = true)
-        {
-            var query = Context.Bugs
+        public Bug GetEditableById(int id) => Context.Bugs
                 .Include(bug => bug.Status)
                 .Include(bug => bug.Severity)
                 .Include(bug => bug.ReportedBy)
-                .Include(bug => bug.FixedBy);
-            if (asTracking)
-                return query.AsTracking().FirstOrDefault(bug => bug.Id == id);
-            return query.AsNoTracking().FirstOrDefault(bug => bug.Id == id);
-        }
+                .Include(bug => bug.FixedBy)
+                .AsTracking()
+                .FirstOrDefault(bug => bug.Id == id);
+
+        public async Task<Bug> getEditableByIdAsync(int id)
+        => await Context.Bugs.Include(bug => bug.Status)
+                                 .Include(bug => bug.Severity)
+                                 .Include(bug => bug.ReportedBy)
+                                 .Include(bug => bug.FixedBy)
+                                 .AsTracking()
+                                 .FirstOrDefaultAsync(bug => bug.Id == id);
     }
 }

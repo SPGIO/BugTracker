@@ -33,42 +33,34 @@ namespace BugTracker.Models.Repositories.Status
 
  
 
-        public IEnumerable<BugStatus> GetAll(bool asTracking = true)
-            => asTracking
-            ? Context.BugStatuses.AsTracking().ToList()
-            : Context.BugStatuses.AsNoTracking().ToList();
+        public IEnumerable<BugStatus> GetAll()
+            => Context.BugStatuses.AsNoTracking().ToList();
 
 
-        public async Task<IEnumerable<BugStatus>> GetAllAsync(bool asTracking = true)
-            => asTracking
-            ? await Context.BugStatuses.AsTracking().ToListAsync()
-            : await Context.BugStatuses.AsNoTracking().ToListAsync();
+        public async Task<IEnumerable<BugStatus>> GetAllAsync()
+            => await Context.BugStatuses.AsNoTracking().ToListAsync();
 
-        public BugStatus GetById(int id, bool asTracking = true)
-            => asTracking 
-            ? Context.BugStatuses.AsTracking()
-                                 .SingleOrDefault(Status => Status.Id == id)
-            : Context.BugStatuses.AsNoTracking()
+        public BugStatus GetById(int id)
+            => Context.BugStatuses.AsNoTracking()
                                  .SingleOrDefault(Status => Status.Id == id);
 
-        public async Task<BugStatus> GetByIdAsync(int id, bool asTracking = true)
-            => asTracking  
-            ? await Context.BugStatuses
-                                .AsTracking()
-                                .SingleOrDefaultAsync(Status => Status.Id == id) 
-            : await Context.BugStatuses
+        public async Task<BugStatus> GetByIdAsync(int id)
+            => await Context.BugStatuses
                                 .AsNoTracking()
                                 .SingleOrDefaultAsync(Status => Status.Id == id);
 
-        public async Task<IEnumerable<BugStatus>> GetByQueryAsync(Expression<Func<BugStatus, bool>> query, bool asTracking = true)
-            => asTracking
-            ? await Context.BugStatuses.Where(query)
-                                       .AsTracking()
-                                       .ToListAsync()
-            : await Context.BugStatuses.Where(query)
+        public async Task<IEnumerable<BugStatus>> GetByQueryAsync(Expression<Func<BugStatus, bool>> query)
+            => await Context.BugStatuses.Where(query)
                                        .AsNoTracking()
                                        .ToListAsync();
-       
+
+        public BugStatus GetEditableById(int id) 
+            => Context.BugStatuses.AsTracking()
+            .SingleOrDefault(Status => Status.Id == id);
+
+        public async Task<BugStatus> getEditableByIdAsync(int id)
+         => await Context.BugStatuses.AsTracking()
+                    .SingleOrDefaultAsync(Status => Status.Id == id);
 
         public void SaveChanges() => Context.SaveChanges();
 

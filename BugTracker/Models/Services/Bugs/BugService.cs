@@ -24,7 +24,7 @@ namespace BugTracker.Models.Services.Bugs
         {
             if (priorty == null) throw new ArgumentNullException();
             Expression<Func<Bug, bool>> expression = bug => bug.Severity == priorty;
-            return await Repository.GetByQueryAsync(expression, asTrackable);
+            return await Repository.GetByQueryAsync(expression);
         }
 
         public IEnumerable<Bug> GetBugsByPriority(BugSeverity priorty, bool asTrackable = true)
@@ -36,7 +36,7 @@ namespace BugTracker.Models.Services.Bugs
         {
             if (status == null) throw new ArgumentNullException();
             Expression<Func<Bug, bool>> expression = bug => bug.Status == status;
-            return await Repository.GetByQueryAsync(expression, asTrackable);
+            return await Repository.GetByQueryAsync(expression);
         }
 
 
@@ -46,10 +46,10 @@ namespace BugTracker.Models.Services.Bugs
         }
 
         public async Task<IEnumerable<Bug>> GetAllBugsAsync(bool asTrackable = true)
-          => await Repository.GetAllAsync(asTrackable);
+          => await Repository.GetAllAsync();
 
         public IEnumerable<Bug> GetAllBugs(bool asTrackable)
-          => Repository.GetAll(asTrackable);
+          => Repository.GetAll();
 
         public async Task DeleteBugAsync(Bug bug)
         {
@@ -112,7 +112,7 @@ namespace BugTracker.Models.Services.Bugs
         public async Task<Bug> GetBugByIdAsync(int? id, bool asTrackable = true)
         {
             if (id == null) throw new BugNotFoundException();
-            var bugFound = await Repository.GetByIdAsync(id.Value, asTrackable);
+            var bugFound = await Repository.GetByIdAsync(id.Value);
             if (bugFound == null) throw new BugNotFoundException();
             return bugFound;
         }
@@ -120,7 +120,7 @@ namespace BugTracker.Models.Services.Bugs
         public Bug GetBugById(int? id, bool asTrackable = true)
         {
             if (id == null) throw new BugNotFoundException();
-            var bugFound = Repository.GetById(id.Value, asTrackable);
+            var bugFound = Repository.GetById(id.Value);
             if (bugFound == null) throw new BugNotFoundException();
             return bugFound;
         }
