@@ -40,15 +40,22 @@ namespace BugTracker.Models.Bugs
             set => severity = value ?? nothingSelectedSeverity;
         }
 
-        public ApplicationUser? ReportedBy { get; set; }
+        public ApplicationUser? ReportedBy
+        {
+            get => reportedBy ?? new UnknownApplicationUser(); 
+            set => reportedBy = value ?? new UnknownApplicationUser();
+        }
         public ApplicationUser? FixedBy { get; set; }
 
-        private int NumberOfDaysUntilOld = 2;
+        public bool IsClosed() => Status.Name == "Closed";
+
         private string title;
         private string description;
         private string howToReproduceBug;
         private BugStatus? status;
         private BugSeverity? severity;
+        private ApplicationUser? reportedBy;
+
         private readonly BugStatus nothingSelectedStatus =  new BugStatus()
         {
             Id = -1,
@@ -74,8 +81,10 @@ namespace BugTracker.Models.Bugs
             howToReproduceBug = string.Empty;
             Status = nothingSelectedStatus;
             Severity = nothingSelectedSeverity;
-
         }
+
+
+        private int NumberOfDaysUntilOld = 2;
 
         public int GetDaysFromToday(DateTime date)
             => (int) DateTime.Now.Subtract(date).TotalDays;

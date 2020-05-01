@@ -12,6 +12,7 @@ namespace BugTrackerXUnitTest
         {
             // Arrange
             var bugReport = new Bug();
+            
             // Act
 
             // Assert
@@ -23,9 +24,11 @@ namespace BugTrackerXUnitTest
         {
             // Arrange
             var bugReport = new Bug();
+            
             // Act
             bugReport.Title = null;
             string actual = bugReport.Title;
+            
             // Assert
             Assert.NotNull(actual);
             Assert.Equal(string.Empty, actual);
@@ -37,7 +40,9 @@ namespace BugTrackerXUnitTest
         { 
             // Arrange
             var bugReport = new Bug();
+            
             // Act
+            
             // Assert
             Assert.NotNull(bugReport.Status);
         }
@@ -47,8 +52,10 @@ namespace BugTrackerXUnitTest
         {
             // Arrange
             var bugReport = new Bug();
+            
             // Act
             bugReport.Status = null;
+            
             // Assert
             Assert.NotNull(bugReport.Status);
             Assert.Equal("Nothing selected", bugReport.Status.Name);
@@ -62,7 +69,9 @@ namespace BugTrackerXUnitTest
         {
             // Arrange
             var bugReport = new Bug();
+            
             // Act
+            
             // Assert
             Assert.NotNull(bugReport.Severity);
         }
@@ -72,8 +81,10 @@ namespace BugTrackerXUnitTest
         {
             // Arrange
             var bugReport = new Bug();
+            
             // Act
             bugReport.Severity = null;
+            
             // Assert
             Assert.NotNull(bugReport.Severity);
             Assert.Equal("Nothing selected", bugReport.Severity.Name);
@@ -87,7 +98,9 @@ namespace BugTrackerXUnitTest
         {
             // Arrange
             var bugReport = new Bug();
+            
             // Act
+            
             // Assert
             Assert.NotNull(bugReport.Description);
         }
@@ -113,7 +126,9 @@ namespace BugTrackerXUnitTest
         {
             // Arrange
             var bugReport = new Bug();
+            
             // Act
+            
             // Assert
             Assert.NotNull(bugReport.HowToReproduceBug);
 
@@ -125,7 +140,9 @@ namespace BugTrackerXUnitTest
         {
             // Arrange
             var bugReport = new Bug();
+            
             // Act
+            
             // Assert
             Assert.Null(bugReport.FixedBy);
         }
@@ -135,7 +152,9 @@ namespace BugTrackerXUnitTest
         {
             // Arrange
             var bugReport = new Bug();
+            
             // Act
+            
             // Assert
             Assert.Null(bugReport.ReportedBy);
         }
@@ -145,7 +164,9 @@ namespace BugTrackerXUnitTest
         {
             // Arrange
             var bugReport = new Bug();
+            
             // Act
+            
             // Assert
             Assert.Null(bugReport.DateFixed);
         }
@@ -180,7 +201,6 @@ namespace BugTrackerXUnitTest
         }
 
         [Fact]
-        [InlineData(int.MaxValue)]
         public void IsNew_CreatedMoreThanTwoDaysAgo_ReturnsFalse()
         {
             // Arrange
