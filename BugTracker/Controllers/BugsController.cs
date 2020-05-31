@@ -24,7 +24,6 @@ namespace BugTracker.Controllers
         private readonly IProjectService projectService;
         private readonly IRepository<BugStatus> statusRepository;
         private readonly IRepository<BugSeverity> severityRepository;
-        private readonly IRepository<Project> projectRepository;
         private readonly IUserRepository userRepository;
         public BugsController(IRepository<Bug> bugRepository,
                               IRepository<BugStatus> statusRepository,
@@ -42,11 +41,7 @@ namespace BugTracker.Controllers
 
         }
 
-        public async Task<IProject> GetProjectRelatedToBug(IBug bug)
-        {
-            var allProjects = await projectRepository.GetAllAsync();
-            return allProjects.First(project => project.Bugs.Contains(bug));
-        }
+       
         public string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
         
         public async Task<bool> IsUserAuthorizedToAccessProject(int projectId)
