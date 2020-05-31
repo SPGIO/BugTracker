@@ -1,0 +1,134 @@
+﻿@model IEnumerable<BugTracker.Models.Bugs.Bug>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+@foreach (var bug in Model)
+{
+    <div class="notice notice-@bug.Severity.Color">
+        @if (bug.IsNew())
+        {
+            <div class="row">
+                <div class="col-12">
+                    <div class="ribbon ribbon-top-right"><span>New</span></div>
+                </div>
+            </div>
+        }
+        <div class="row">
+            <div class="col-12 col-lg-12">
+                <strong><a asp-action="Details" asp-route-id="@bug.Id">@Html.DisplayFor(model => bug.Title)</a></strong>
+            </div>
+            <div class="col-12">
+                <p>@Html.DisplayFor(model => bug.Description)</p>
+            </div>
+
+            <div class="col-12"><hr /></div>
+            <div class="col-12 col-lg-12">
+                <div class="row">
+                    <div class="col-12 col-md-4 col-lg-2" style="border-right: 1px solid rgba(0,0,0,0.1)">
+                        <a class="d-flex" asp-action="Edit" asp-route-id="@bug.Id">
+                                <i class="fas fa-edit" style="line-height:1.5"></i>Edit
+                        </a>
+                    </div>
+                    <div class="col-12 col-md-4 col-lg-2" style="border-right: 1px solid rgba(0,0,0,0.1)">
+                        <span class="badge badge-@bug.Severity.Color">@Html.DisplayFor(model => bug.Severity.Name)</span>
+                    </div>
+                    <div class="col-12 col-md-4 col-lg-2" style="border-right: 1px solid rgba(0,0,0,0.1)">
+                        <span class="badge badge-@bug.Status.Color">@Html.DisplayFor(model => bug.Status.Name)</span>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-3" style="border-right: 1px solid rgba(0,0,0,0.1)">
+                        <p class="smaller mb-0">@Html.DisplayNameFor(model => model.ReportedBy)</p>
+                        <p class="small mb-0">@Html.DisplayFor(model => bug.ReportedBy.UserName)</p>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <p class="smaller mb-0">@Html.DisplayNameFor(model => model.DateReported)</p>
+                        <p class="small mb-0">@Html.DisplayFor(model => bug.DateReported)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+}
+
+@*<table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Title)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Description)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.HowToReproduceBug)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.DateReported)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ReportedBy)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Severity)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Status)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.DateFixed)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FixedBy)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Title)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Description)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.HowToReproduceBug)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DateReported)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ReportedBy.UserName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Severity.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Status.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DateFixed)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FixedBy.UserName)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>*@

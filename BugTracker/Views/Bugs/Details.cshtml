@@ -1,0 +1,75 @@
+﻿@model BugTracker.Models.Bugs.Bug
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Bug</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Title)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Title)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.HowToReproduceBug)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.HowToReproduceBug)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.DateReported)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.DateReported)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ReportedBy)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ReportedBy.UserName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Severity.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Severity.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Status.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Status.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.DateFixed)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.DateFixed)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.FixedBy)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.FixedBy.UserName)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@Model.Id">Delete</a>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
